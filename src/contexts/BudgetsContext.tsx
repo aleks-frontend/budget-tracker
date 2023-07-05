@@ -29,9 +29,17 @@ interface BudgetsContextProps {
   deleteExpense: (expenseUniqueId: string) => void;
 }
 
-const BudgetsContext = React.createContext<any | null>(null);
+const BudgetsContext = React.createContext<BudgetsContextProps>({
+  budgets: [],
+  expenses: [],
+  getBudgetExpenses: () => [],
+  addBudget: () => {},
+  deleteBudget: () => {},
+  addExpense: () => {},
+  deleteExpense: () => {},
+});
 
-export const UNCATEGORIZED_BUDGET_UNIQUE_ID = 'uncategorized';
+export const UNCATEGORIZED_BUDGET_UNIQUE_ID = "uncategorized";
 
 export const useBudgets = () => {
   const context = useContext(BudgetsContext);
@@ -61,7 +69,17 @@ export const BudgetsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const deleteBudget = (budgetUniqueId: string) => {
-    // TODO deal with expenses
+    setExpenses((prevState) => {
+      return prevState.map((expense) => {
+        if (expense.budgetUniqueId === budgetUniqueId) {
+          return {
+            ...expense,
+            budgetUniqueId: UNCATEGORIZED_BUDGET_UNIQUE_ID,
+          };
+        }
+        return expense;
+      });
+    })
 
     setBudgets((prevState) =>
       prevState.filter((budget) => budget.uniqueId !== budgetUniqueId)
@@ -86,7 +104,7 @@ export const BudgetsProvider = ({ children }: { children: ReactNode }) => {
       prevState.filter((expense) => expense.uniqueId !== expenseUniqueId)
     );
   };
-  
+
   return (
     <BudgetsContext.Provider
       value={{
